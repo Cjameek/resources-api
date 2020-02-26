@@ -6,10 +6,23 @@ const Resource = require('../models/resources');
 
 router.get('/', (req, res, next) => {
     Resource.find()
+    .select('name category _id')
     .exec()
     .then(docs => {
         console.log(docs);
-        res.status(200).json(docs);
+        const response = {
+            count: docs.length,
+            results: docs.map(doc => {
+                return {
+                    ...doc._doc,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:3000/resources/' + doc._id
+                    }
+                }
+            })
+        }
+        res.status(200).json(response);
         
     })
     .catch(err => {
@@ -44,11 +57,18 @@ router.post('/', (req, res, next) => {
 router.get('/:resourceId', (req, res, next) => {
     const id = req.params.resourceId;
     Resource.findById(id)
+    .select('name category _id')
     .exec()
     .then(doc => {
         console.log(doc);
         if(doc){
-            res.status(200).json(doc);
+            res.status(200).json({
+                result: doc,
+                request: {
+                    type: 'GET',
+                    url: 'http::localhost:3000/resources/'
+                }
+            });
         } else {
             res.status(404).json({
                 message: 'No valid entry found'
@@ -68,7 +88,11 @@ router.patch('/:resourceId', (req, res, next) => {
     .then(result => {
         console.log(result);
         res.status(200).json({
-            message: 'Resource updated successfully'
+            message: 'Resource updated',
+            request: {
+                type: 'GET',
+                url: 'http://localhost:3000/resources' + result._id
+            }
         });
     })
     .catch( err => { 
@@ -83,7 +107,14 @@ router.delete('/:resourceId', (req, res, next) => {
     .exec()
     .then(result => {
         console.log(result);
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Resource deleted',
+            request: {
+                type: 'POST',
+                url: 'http://localhost:3000/resources',
+                body: { name: 'String', category: 'String' }
+            } 
+        });
     })
     .catch( err => { 
         console.log(err)
