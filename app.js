@@ -2,9 +2,12 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const resourceRoutes = require('./api/routes/resources');
 const userRoutes = require('./api/routes/users');
+
+mongoose.connect('mongodb+srv://' + process.env.MONGO_DB_USER + ':' + process.env.MONGO_DB_PASS + '@node-resources-api-r9djh.mongodb.net/test?retryWrites=true&w=majority', { useMongoClient: true });
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
