@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 });
 
 // Handle request routes
+app.use('/uploads', express.static('uploads'));
 app.use('/resources', resourceRoutes);
 app.use('/users', userRoutes);
 
