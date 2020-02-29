@@ -1,12 +1,39 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        const uploadPath = './uploads/';
+
+        cb(null, uploadPath);
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') ? cb(null, true) : cb(null, false);
+
+    // Could pass new Error instead of null on false
+}
+
+const upload = multer({
+    storage: storage, 
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    },
+    fileFilter: fileFilter
+});
 
 const Resource = require('../models/resources');
 
 router.get('/', (req, res, next) => {
     Resource.find()
-    .select('name category _id')
+    .select('name category _id resourceFile')
     .exec()
     .then(docs => {
         console.log(docs);
@@ -33,11 +60,13 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('resourceFile'), (req, res, next) => {
+    console.log(req.file);
     const resource = new Resource({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        category: req.body.category
+        category: req.body.category,
+        resourceFile: req.file.path
     });
     resource.save().then(result => {
         console.log(result);
@@ -57,7 +86,7 @@ router.post('/', (req, res, next) => {
 router.get('/:resourceId', (req, res, next) => {
     const id = req.params.resourceId;
     Resource.findById(id)
-    .select('name category _id')
+    .select('name category _id resourceFile')
     .exec()
     .then(doc => {
         console.log(doc);
