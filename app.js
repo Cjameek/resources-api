@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const resourceRoutes = require('./api/routes/resources');
-const userRoutes = require('./api/routes/users');
+const userRoutes = require('./api/routes/user');
 
 mongoose.connect('mongodb+srv://' + process.env.MONGO_DB_USER + ':' + encodeURIComponent(process.env.MONGO_DB_PASS) + '@node-resources-api-r9djh.mongodb.net/test?retryWrites=true&w=majority', { 
     useUnifiedTopology: true,
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 // Handle request routes
 app.use('/uploads', express.static('uploads'));
 app.use('/resources', resourceRoutes);
-app.use('/users', userRoutes);
+app.use('/user', userRoutes);
 
 // Error handling on bad REST routes
 app.use((req, res, next) => {
